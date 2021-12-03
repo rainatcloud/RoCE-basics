@@ -32,4 +32,10 @@ watch -n 1 -d 'for F in `ls /sys/class/infiniband/mlx5_0/ports/1/hw_counters/* |
 #测试带宽，tc对应于之前配置的105（DSCP 26）
 ib_write_bw --duration=10 -d mlx5_0 --gid-index=3 --size=8 --qp=4  --tclass=105 -F --report_gbits --disable_pcie_relaxed
 
+#可以watch包含cnp和ecn的更多统计信息
+watch -d -n 1 'for F in /sys/class/infiniband/mlx5_bond_0/ports/1/hw_counters/* ; do echo -n "$F: " ; cat $F; done '
+
+#查看网口的pause包增长情况
+mlnx_perf -i enp129s0f0  | egrep 'dis|err|out|buff|pause'
+
 
