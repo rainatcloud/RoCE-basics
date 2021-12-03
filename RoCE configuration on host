@@ -1,0 +1,35 @@
+
+
+#! /bin/sh
+set -x
+
+#打开mst，也可以不执行
+mst start
+
+#打开DCQCN，配置在priority 3上
+mlxconfig -y -d /dev/mst/mt4119_pciconf0 s ROCE_CC_PRIO_MASK_P1=8 ROCE_CC_PRIO_MASK_P2=8
+
+#把CNP的配置DSCP配置为48
+mlxconfig -y -d /dev/mst/mt4119_pciconf0 s CNP_DSCP_P1=48 CNP_DSCP_P2=48
+
+#设置RoCE的数据业务的DSCP为26, （tos=105）
+cma_roce_tos -d mlx5_0 -t 105
+
+#设置RoCEv2，默认就是，一般不用改
+#cma_roce_mode -d mlx5_bond_0 -p 1 -m 2
+
+#打开端口的dscp映射，在priority 3打开pfc
+mlnx_qos -i enp175s0f0 --trust=dscp --pfc=0,0,0,1,0,0,0,0
+mlnx_qos -i enp175s0f1 --trust=dscp --pfc=0,0,0,1,0,0,0,0
+
+#基本troubleshooting用命令：
+#查看是否有pause
+watch -n 1 -d 'ethtool -S enp175s0f0 | grep pause'
+#查看是否有cnp报文
+watch -n 1 -d 'for F in `ls /sys/class/infiniband/mlx5_0/ports/1/hw_counters/* | egrep "cnp|ecn"`; do echo -n "$F: "; cat $F; done'
+
+
+#测试带宽，tc对应于之前配置的105（DSCP 26）
+ib_write_bw --duration=10 -d mlx5_0 --gid-index=3 --size=8 --qp=4  --tclass=105 -F --report_gbits --disable_pcie_relaxed
+
+
