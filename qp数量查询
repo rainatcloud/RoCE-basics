@@ -1,0 +1,18 @@
+
+#查看设备支持的最大qp数量
+ibv_devinfo -v -d mlx5_x | grep max_qp
+
+#查看当前qp的使用，返回当前使用的qp号
+ls /sys/kernel/debug/mlx5/0000\:03\:00.1/QPs
+
+#查看创建的qp总数
+cat /sys/kernel/debug/mlx5/0000\:03\:00.1/commands/CREATE_QP/n
+
+#查看删除的qp总数
+cat /sys/kernel/debug/mlx5/0000\:03\:00.1/commands/DESTROY_QP/n
+
+#查看当前qp使用情况
+/opt/mellanox/iproute2/sbin/rdma res
+/opt/mellanox/iproute2/sbin/rdma resource show qp
+
+
