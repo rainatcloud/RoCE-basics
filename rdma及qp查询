@@ -15,4 +15,5 @@ cat /sys/kernel/debug/mlx5/0000\:03\:00.1/commands/DESTROY_QP/n
 /opt/mellanox/iproute2/sbin/rdma res
 /opt/mellanox/iproute2/sbin/rdma resource show qp
 
-
+#查看rdma统计数据
+rdma  statistic -p
