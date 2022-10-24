@@ -1,4 +1,4 @@
-
+#从rdmamojo翻译
 # 是否可以动态修改不同的连接方式？
 1. Changing the QP state explicitly in the application by calling ibv_modify_qp()
 2. Using librdmacm (in iWARP this is the only way to do it)  -- 怎么改？
