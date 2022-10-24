@@ -1,0 +1,7 @@
+
+# 是否可以动态修改不同的连接方式？
+1. Changing the QP state explicitly in the application by calling ibv_modify_qp()
+2. Using librdmacm (in iWARP this is the only way to do it)  -- 怎么改？
+
+# 通信双方不能通过QP发送QP自身信息，所以RDMA中，如果对端信息已知，连接是通过CM使用一个well-known QP (QP 1)来建立以交互这些需要的信息。
+# 这里描述下需要哪些信息，这些信息基于QP的传输类型和状态机不同而不同
