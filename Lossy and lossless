@@ -37,6 +37,9 @@ roce_slow_restart
 roce_slow_restart_idle (Trade off)
 mlxreg -d /dev/mst/mt4119_pciconf0 --reg_name ROCE_ACCL --set "roce_adp_retrans_en=0x1, roce_tx_window_en=0x1, roce_slow_restart_en=0x1, roce_slow_restart_idle_en=0x1"
 
+//查询
+mlxreg -d /dev/mst/mt4119_pciconf0 --reg_name ROCE_ACCL --get
+
 CX6 Dx额外支持selective repeat
 mlxconfig -d /dev/mst/mt4119_pciconf0 s RDMA_SELECTIVE_REPEAT_EN=0x1
 mlxfwreset -d /dev/mst/mt4119_pciconf0 r
