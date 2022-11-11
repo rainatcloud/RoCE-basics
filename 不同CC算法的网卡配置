@@ -1,0 +1,59 @@
+
+#RoCE有很多拥塞算法，可以通过固件配置来调整和修改
+#有些配置需要新的mft工具，并且与驱动和固件版本有耦合关系，一般建议用最新驱动、驱动中带的mft工具和固件
+
+共有以下模式的cc算法：
+1. HW DCQCN：拥塞情况下，CNP的发送和处理counter都会增加，但是RTT counter不会增加
+2. PCC DCQCN：拥塞情况下，只有CNP发送counter增加，CNP处理counter不增加，RTT counter不增加
+3. HPCC：RTT counter增加，设置scratchpad.nv_config.nv_config_main.fw_config.global.hpcc_int.hpcc_int_en参数
+4. ZTR_RTTCC：RTT counter增加，不设置scratchpad.nv_config.nv_config_main.fw_config.global.hpcc_int.hpcc_int_en参数
+
+Per-IP模式是默认的算法。 
+
+需要提前注意：算法需要与对应的QoS和Lossy feature对应，因此不能漏掉对应的lossy配置
+
+##DCQCN QP模式（不建议配）：
+mlxconfig -d a1:00.0 -y s ROCE_CC_LEGACY_DCQCN=1
+mlxfwreset -d a1:00.0 reset -y -l3
+mcra a1:00.0 0x14420.8:5 14
+mcra a1:00.0 0x14420.16:5 14
+mcra a1:00.0 0x28e520.8:5 14
+mcra a1:00.0 0x28e520.16:5 14
+
+##PCC DCQCN IP模式:
+mlxconfig -d a1:00.0 -y s ROCE_CC_LEGACY_DCQCN=0
+mlxfwreset -d a1:00.0 reset -y -l3
+
+##PCC DCQCN QP模式（不建议配，未尝试）：
+mlxconfig -d a1:00.0 -y s ROCE_CC_LEGACY_DCQCN=0
+mlxfwreset -d a1:00.0 reset -y -l3
+mcra a1:00.0 0x14420.0:3 0
+mcra a1:00.0 0x14420.4:3 0
+mcra a1:00.0 0x28e520.0:3 0
+mcra a1:00.0 0x28e520.4:3 0
+mcra a1:00.0 0x28c808.0:22 9000
+
+##HPCC配置需要额外脚本和固件image，再次不建议，也不描述使用方法
+
+##ZTR_RTTCC (IP模式）
+mlxconfig -d a1:00.0 -y s ROCE_CC_LEGACY_DCQCN=0
+mlxconfig -d a1:00.0 -y s USER_PROGRAMMABLE_CC=1
+mlxfwreset -d a1:00.0 reset -y -l3
+
+##以下命令待修改（-E- Can't find field name: "algo_index"）
+mlxreg -d a1:00.0 -y --set "cmd_type=2" --reg_name PPCC --indexes "local_port=0,pnat=0,lp_msb=0,algo_index=15,algo_param_index=0"
+mcra a1:00.0 0x14420.0:3 5
+mcra a1:00.0 0x14420.4:3 5
+mcra a1:00.0 0x28e520.0:3 5
+mcra a1:00.0 0x28e520.4:3 5
+mcra a1:00.0 0x28c808.0:22 1500
+mcra a1:00.0 0x28c808.0:22 4500
+mlnx_qos -i enp129s0f1 --trust dscp -f 0,0,0,0,0,0,0,0;
+mlxreg -d 81:00.0 --reg_name ROCE_ACCL --set roce_adp_retrans_en=0x1,roce_tx_window_en=0x1,roce_slow_restart_en=0x1 --yes
+
+
+##以下仅供参考，可以不用
+##各种配置之前切换重置可以执行：
+mlxfwreset -d a1:00.0 reset -y -l3
+flint -d a1:00.0 ww 0x01fa0000 0;sudo flint -d a1:00.0 ww 0x01fc0000 0
+mlxconfig -d a1:00.0 -y reset
