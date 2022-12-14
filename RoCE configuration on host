@@ -38,12 +38,15 @@ mlxconfig -y -d /dev/mst/mt4119_pciconf0 s ROCE_CC_PRIO_MASK_P1=8 ROCE_CC_PRIO_M
 
 #前面两个配置，重启或者执行mlxfwreset -d /dev/mst/mt4119_pciconf0 生效，建议重启
 
-#设置RoCE的数据业务的DSCP为26, （tos=105）
+#设置RoCE CM的DSCP为26, （tos=105）
 # 这个对应关系
 cma_roce_tos -d mlx5_0 -t 105
 
+# 仅作参考，可以不设：非RDMA CM的业务可以使用如下命令
+echo 105 > /sys/class/infiniband/mlx5_0/tc/1/traffic_class
+
 #设置RoCEv2，默认就是，一般不用改
-#cma_roce_mode -d mlx5_bond_0 -p 1 -m 2
+#cma_roce_mode -d mlx5_0 -p 1 -m 2
 
 #打开端口的dscp映射，在priority 3打开pfc
 mlnx_qos -i enp175s0f0 --trust=dscp --pfc=0,0,0,1,0,0,0,0
