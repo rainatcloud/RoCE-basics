@@ -1,0 +1,10 @@
+
+
+#simulater，执行
+source MlnxCCSimSetup
+
+#进入sim目录，执行
+../bin/ccsim_release ccsim.ini -a
+
+-- 如何加入新的算法？
+
