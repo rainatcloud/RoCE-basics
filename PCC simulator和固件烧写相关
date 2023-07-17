@@ -1,11 +1,23 @@
 
+1. simulator
+
 #推荐使用simulator进行测试
 #simulater，执行
 source MlnxCCSimSetup
 #进入sim目录，执行
 ../bin/ccsim_release ccsim.ini -a
 
-#真正的固件烧写，参考Programmable Congestion Control Development Package User Manual v2.0进行配置和固件编译烧写
+Sca files is omnet++ standard output that collect scalars from the simulation. 
+Param file is something we generate to validate the parameters you used.
+ 
+They can also run with vectors (there is a config like this in the ini file) 
+The will get vec file as output, they need to omnet gui to read it (the can download it from Omnet site)
+
+
+
+2.真正的固件烧写
+
+#参考Programmable Congestion Control Development Package User Manual v2.0进行配置和固件编译烧写
 #执行mlxfwmanager，找到对应的固件
 # mlxfwmanager
 Querying Mellanox devices firmware ...
