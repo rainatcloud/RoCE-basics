@@ -33,7 +33,8 @@ mcra a1:00.0 0x28e520.0:3 0
 mcra a1:00.0 0x28e520.4:3 0
 mcra a1:00.0 0x28c808.0:22 9000
 
-##HPCC配置需要额外脚本和固件image，再次不建议，也不描述使用方法
+#使用INT作为输入的算法配置，类似HPCC，需要交换机配合，支持对应的INT格式，PCC的模拟器也可以模拟INT
+mlxconfig -d a1:00.0 -y s USER_PROGRAMMABLE_CC=1 PCC_INT_EN=1 PCC_INT_NP_RTT_DATA_MODE=0 PCC_INT_NP_RTT_DSCP_EN=0 PCC_INT_NP_RTT_DSCP=26 PCC_INT_SYSTEM_RTT=0
 
 ##ZTR_RTTCC (IP模式）
 mlxconfig -d a1:00.0 -y s ROCE_CC_LEGACY_DCQCN=0
