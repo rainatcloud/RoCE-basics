@@ -7,13 +7,12 @@ source MlnxCCSimSetup
 #进入sim目录，执行
 ../bin/ccsim_release ccsim.ini -a
 
-Sca files is omnet++ standard output that collect scalars from the simulation. 
-Param file is something we generate to validate the parameters you used.
+执行simulator之后有两个output files. 
+Sca文件是omnet++的标准输出，collect scalars from the simulation. 
+Param文件是NVIDIA生成的用来验证所用参数的文件 something we generate to validate the parameters you used.
  
-They can also run with vectors (there is a config like this in the ini file) 
-The will get vec file as output, they need to omnet gui to read it (the can download it from Omnet site)
-
-
+也可以使用vectors执行 (there is a config like this in the ini file) 
+会产生vec file的output，需要使用omnet gui来读对应文件(Omnet可以从Omnet官网下载)
 
 2.真正的固件烧写
 
