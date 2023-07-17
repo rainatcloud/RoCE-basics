@@ -1,0 +1,51 @@
+
+
+1. 
+#触发条件的含义
+typedef enum
+{
+    EVNT_NULL       =  0,
+    EVNT_FW         =  1,
+    EVNT_ROCE_CNP   =  2,            // triggered every time a CNP is received
+    EVNT_ROCE_TX    =  3,            // triggered by every burst size(8kB) or everytime a rtt_req are sent (ev_attr_flas == TX_FLAG_RTT_REQ_SENT)? 
+                                     [Wei] this is PCC burst which is 4K, not sx burst.
+    EVNT_ROCE_ACK   =  4,            // triggered by every ack
+    EVNT_ROCE_NACK  =  5,            // triggered by every nack
+    EVNT_RTT        =  6             // triggered by every rtt ack
+} event_type_enum;
+
+
+2. 
+Does it mean that the events is coalesced? And what does it works for this coalesced events and how below function work? 
+[Wei] Not every event will be coalesced, it happens only when events from same flow are next to each other and previous one is about to be handled. Not sure how many HW details we should expose here.
+
+// For TX/ACK/NACK/CNP events, first coalesced event timestamp
+FORCE_INLINE uint32 mlnx_cc_get_roce_first_timestamp() {
+    return mlnx_rd_lcr(FIRST_TIMESTAMP_ADDR);
+}
+
+// For ACK/NACK/CNP events, first coalesced event serial number
+FORCE_INLINE uint32 mlnx_cc_get_roce_ack_first_sn() {
+    return mlnx_rd_lcr(FIRST_SN_ADDR);
+}
+
+3. 
+
+With below command customer tried to disable DCQCN
+mlxreg -d /dev/mst/mt41686_pciconf0 -y --set "cmd_type=2" --reg_name PPCC --indexes "local_port=0,pnat=0,lp_msb=0,algo_slot=15,algo_param_index=0"
+
+while with a check that it’s DCQCN is still in use state.
+Can I understand that DCQCN as a default algorithm will all be in use state? 
+As ECE negotiation will check if all NIC in communication support same PCC algo and will fall back to DCQCN if not, so can I understand that the PPCC register can only check if the algo is enabled or not instead of the algo in use
+
+1.	The check script is for reference only. If you run DCQCN, the advanced bit will not rise. But if you run advance algo, the bit for DCQCN will rise as well.
+In order to make sure their algo is always called, they can call their algo in the algo_wrapper regardless of which algo_type we pass to them.
+2.	RTT is a separate packet.
+
+4. 
+
+There are PRINTF in the customized algo, customer want to see this log. 
+Do you know how they can read the log? Is it in dmesg or any tools needed?
+
+The PRINTF func is empty in current code, it is used for simulator only. If customers want to see trace, they can add it by themselves using PCC_LOG.
+There is command how to collect trace in readme
