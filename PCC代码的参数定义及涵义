@@ -1,51 +1,50 @@
 
 
-1. 
-#触发条件的含义
+1. event的触发条件机涵义
+event的触发是在发送和接收队列的时候把对应的event给到固件的event queue，作为输入传到算法里面
 typedef enum
 {
     EVNT_NULL       =  0,
     EVNT_FW         =  1,
     EVNT_ROCE_CNP   =  2,            // triggered every time a CNP is received
     EVNT_ROCE_TX    =  3,            // triggered by every burst size(8kB) or everytime a rtt_req are sent (ev_attr_flas == TX_FLAG_RTT_REQ_SENT)? 
-                                     [Wei] this is PCC burst which is 4K, not sx burst.
+                                     第一个不是每8kB的数据触发一次，而是每4k一次，4k是写死的，和burst_size没关系，发完探测跑后立即触发event，4k burst的触发和RTT探测包的触发是独立的，不会互相等待
+                                    　如果同时触发了rtt，会在tx的event里面带对应的flag
     EVNT_ROCE_ACK   =  4,            // triggered by every ack
     EVNT_ROCE_NACK  =  5,            // triggered by every nack
     EVNT_RTT        =  6             // triggered by every rtt ack
 } event_type_enum;
 
+探测包和burst独立
 
-2. 
-Does it mean that the events is coalesced? And what does it works for this coalesced events and how below function work? 
-[Wei] Not every event will be coalesced, it happens only when events from same flow are next to each other and previous one is about to be handled. Not sure how many HW details we should expose here.
+2. events折叠
+多个event依次在一个很短的时间段内收到，不会生成独立event，而是折叠到（coalesced）一个event里
+Not every event will be coalesced, it happens only when events from same flow are next to each other and previous one is about to be handled.
 
-// For TX/ACK/NACK/CNP events, first coalesced event timestamp
+// 类似如下，对于TX/ACK/NACK/CNP events, 只上报第一个折叠了的event的timestamp
 FORCE_INLINE uint32 mlnx_cc_get_roce_first_timestamp() {
     return mlnx_rd_lcr(FIRST_TIMESTAMP_ADDR);
 }
 
-// For ACK/NACK/CNP events, first coalesced event serial number
+//只有第一个coalesced event的serial number返回有意义
 FORCE_INLINE uint32 mlnx_cc_get_roce_ack_first_sn() {
     return mlnx_rd_lcr(FIRST_SN_ADDR);
 }
+后续事件如果折叠，将累加到前面第一个折叠的统计里面
 
-3. 
+3. DCQCN在关闭情况下，查看依然是打开的
 
-With below command customer tried to disable DCQCN
+使用如下命令关闭DCQCN
 mlxreg -d /dev/mst/mt41686_pciconf0 -y --set "cmd_type=2" --reg_name PPCC --indexes "local_port=0,pnat=0,lp_msb=0,algo_slot=15,algo_param_index=0"
+但是使用命令检查发现DCQCN依然在in use状态：
+．／ｂｌｕｅｆｉｅｌｄ２＿ｃｈｅｃｋ＿ｐｃｃ＿ｌｏａｄ
 
-while with a check that it’s DCQCN is still in use state.
-Can I understand that DCQCN as a default algorithm will all be in use state? 
-As ECE negotiation will check if all NIC in communication support same PCC algo and will fall back to DCQCN if not, so can I understand that the PPCC register can only check if the algo is enabled or not instead of the algo in use
+回答：ECE协商会检查如果对端网卡支持相同的ＰＣＣ算法，否则就会回退到DCQCN。在跑DCQCN的时候，advanced algo bit不会是yes，但是跑自定义算法的时候，确实DCQCN会是yes，这个不是bug。
+如果想确认dc2qcn的算法，不想fall back到dcqcn，可以在algo_wrapper里面不调用default算法，不管algo_type传的是啥，都用dc2qcn
 
-1.	The check script is for reference only. If you run DCQCN, the advanced bit will not rise. But if you run advance algo, the bit for DCQCN will rise as well.
-In order to make sure their algo is always called, they can call their algo in the algo_wrapper regardless of which algo_type we pass to them.
-2.	RTT is a separate packet.
+4. 打印ｄｅｂｕｇ　ｌｏｇ
+当前PRINTF func是空的，只给simulator使用。如果希望看trace, 可以通过调用PCC_LOG打印
+使用如下命令读：
+fwtrace -d /dev/mst/mt4125_pciconf0 --tracer_mode MEM -i all -s --f cc_image_fw_strings.db -m 0 -l 4
 
-4. 
 
-There are PRINTF in the customized algo, customer want to see this log. 
-Do you know how they can read the log? Is it in dmesg or any tools needed?
-
-The PRINTF func is empty in current code, it is used for simulator only. If customers want to see trace, they can add it by themselves using PCC_LOG.
-There is command how to collect trace in readme
