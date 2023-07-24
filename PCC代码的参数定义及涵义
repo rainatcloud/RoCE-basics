@@ -37,12 +37,12 @@ FORCE_INLINE uint32 mlnx_cc_get_roce_ack_first_sn() {
 使用如下命令关闭DCQCN
 mlxreg -d /dev/mst/mt41686_pciconf0 -y --set "cmd_type=2" --reg_name PPCC --indexes "local_port=0,pnat=0,lp_msb=0,algo_slot=15,algo_param_index=0"
 但是使用命令检查发现DCQCN依然在in use状态：
-．／ｂｌｕｅｆｉｅｌｄ２＿ｃｈｅｃｋ＿ｐｃｃ＿ｌｏａｄ
+./bluefield2_check_pcc_load
 
-回答：ECE协商会检查如果对端网卡支持相同的ＰＣＣ算法，否则就会回退到DCQCN。在跑DCQCN的时候，advanced algo bit不会是yes，但是跑自定义算法的时候，确实DCQCN会是yes，这个不是bug。
+回答：ECE协商会检查如果对端网卡支持相同的PCC算法，否则就会回退到DCQCN。在跑DCQCN的时候，advanced algo bit不会是yes，但是跑自定义算法的时候，确实DCQCN会是yes，这个不是bug。
 如果想确认dc2qcn的算法，不想fall back到dcqcn，可以在algo_wrapper里面不调用default算法，不管algo_type传的是啥，都用dc2qcn
 
-4. 打印ｄｅｂｕｇ　ｌｏｇ
+4. 打印debug log
 当前PRINTF func是空的，只给simulator使用。如果希望看trace, 可以通过调用PCC_LOG打印
 使用如下命令读：
 fwtrace -d /dev/mst/mt4125_pciconf0 --tracer_mode MEM -i all -s --f cc_image_fw_strings.db -m 0 -l 4
