@@ -1,3 +1,8 @@
 
+除了老的ibv编程接口之外，The user space RDMA subsystem (known as RDMA-core) library introduces two new libmlx5 API
+channels named mlx5_dv_* and mlx5dv_devx_*:
+• mlx5dv is a channel to configure hardware objects with Mellanox specific attributes.
+• mlx5dv_devx is a channel that exposes raw Mellanox hardware objects, enabling the use of
+hardware features with minimal kernel changes (some of the mlx5dv APIs use mlx5dv_devx
+in user space level).
 
-https://docs.nvidia.com/networking/pages/viewpage.action?pageId=34256560
