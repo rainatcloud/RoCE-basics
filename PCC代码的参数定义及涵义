@@ -42,9 +42,11 @@ mlxreg -d /dev/mst/mt41686_pciconf0 -y --set "cmd_type=2" --reg_name PPCC --inde
 回答：ECE协商会检查如果对端网卡支持相同的PCC算法，否则就会回退到DCQCN。在跑DCQCN的时候，advanced algo bit不会是yes，但是跑自定义算法的时候，确实DCQCN会是yes，这个不是bug。
 如果想确认dc2qcn的算法，不想fall back到dcqcn，可以在algo_wrapper里面不调用default算法，不管algo_type传的是啥，都用dc2qcn
 
+注意：如果是用第二个端口，注意设置local_port=1
+
 4. 打印debug log
 当前PRINTF func是空的，只给simulator使用。如果希望看trace, 可以通过调用PCC_LOG打印
 使用如下命令读：
 fwtrace -d /dev/mst/mt4125_pciconf0 --tracer_mode MEM -i all -s --f cc_image_fw_strings.db -m 0 -l 4
 
-
+注意：在BF-2 上 --tracer_mode MEM 如果是CX-6 DX上，需要改用 --tracer_mode FIFO，否则追踪不到日志
