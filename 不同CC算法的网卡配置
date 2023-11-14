@@ -12,26 +12,9 @@ Per-IP模式是默认的算法。
 
 需要提前注意：算法需要与对应的QoS和Lossy feature对应，因此不能漏掉对应的lossy配置
 
-##DCQCN QP模式（不建议配）：
-mlxconfig -d a1:00.0 -y s ROCE_CC_LEGACY_DCQCN=1
-mlxfwreset -d a1:00.0 reset -y -l3
-mcra a1:00.0 0x14420.8:5 14
-mcra a1:00.0 0x14420.16:5 14
-mcra a1:00.0 0x28e520.8:5 14
-mcra a1:00.0 0x28e520.16:5 14
-
 ##PCC DCQCN IP模式:
 mlxconfig -d a1:00.0 -y s ROCE_CC_LEGACY_DCQCN=0
 mlxfwreset -d a1:00.0 reset -y -l3
-
-##PCC DCQCN QP模式（不建议配，未尝试）：
-mlxconfig -d a1:00.0 -y s ROCE_CC_LEGACY_DCQCN=0
-mlxfwreset -d a1:00.0 reset -y -l3
-mcra a1:00.0 0x14420.0:3 0
-mcra a1:00.0 0x14420.4:3 0
-mcra a1:00.0 0x28e520.0:3 0
-mcra a1:00.0 0x28e520.4:3 0
-mcra a1:00.0 0x28c808.0:22 9000
 
 #使用INT作为输入的算法配置，类似HPCC，需要交换机配合，支持对应的INT格式，PCC的模拟器也可以模拟INT
 mlxconfig -d a1:00.0 -y s USER_PROGRAMMABLE_CC=1 PCC_INT_EN=1 PCC_INT_NP_RTT_DATA_MODE=0 PCC_INT_NP_RTT_DSCP_EN=0 PCC_INT_NP_RTT_DSCP=26 PCC_INT_SYSTEM_RTT=0
@@ -41,20 +24,6 @@ mlxconfig -d a1:00.0 -y s ROCE_CC_LEGACY_DCQCN=0
 mlxconfig -d a1:00.0 -y s USER_PROGRAMMABLE_CC=1
 mlxfwreset -d a1:00.0 reset -y -l3
 
-##以下命令待修改（-E- Can't find field name: "algo_index"）
-mlxreg -d a1:00.0 -y --set "cmd_type=2" --reg_name PPCC --indexes "local_port=0,pnat=0,lp_msb=0,algo_index=15,algo_param_index=0"
-mcra a1:00.0 0x14420.0:3 5
-mcra a1:00.0 0x14420.4:3 5
-mcra a1:00.0 0x28e520.0:3 5
-mcra a1:00.0 0x28e520.4:3 5
-mcra a1:00.0 0x28c808.0:22 1500
-mcra a1:00.0 0x28c808.0:22 4500
-mlnx_qos -i enp129s0f1 --trust dscp -f 0,0,0,0,0,0,0,0;
-mlxreg -d 81:00.0 --reg_name ROCE_ACCL --set roce_adp_retrans_en=0x1,roce_tx_window_en=0x1,roce_slow_restart_en=0x1 --yes
-
-
-##以下仅供参考，可以不用
-##各种配置之前切换重置可以执行：
-mlxfwreset -d a1:00.0 reset -y -l3
-flint -d a1:00.0 ww 0x01fa0000 0;sudo flint -d a1:00.0 ww 0x01fc0000 0
-mlxconfig -d a1:00.0 -y reset
+##打开pcc后，可以选择关闭默认算法，确保使用pcc算法
+mlxreg -d /dev/mst/mt4129_pciconf0   -y --set "cmd_type=2" --reg_name PPCC --indexes "local_port=1,pnat=0,lp_msb=0,algo_slot=15,algo_param_index=0"
+mlxreg -d /dev/mst/mt4129_pciconf0.1   -y --set "cmd_type=2" --reg_name PPCC --indexes "local_port=1,pnat=0,lp_msb=0,algo_slot=15,algo_param_index=0"
