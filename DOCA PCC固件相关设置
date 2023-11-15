@@ -1,9 +1,10 @@
 
-#打开DOCA PCC的基础设置
+#DoCA PCC使用方法及查询命令的解释参见文档 https://docs.nvidia.com/doca/sdk/pcc/index.html
+#例如，打开DOCA PCC的基础设置
 mlxconfig -d <mlx_device> -y s USER_PROGRAMMABLE_CC=1
 
-#DoCA PCC使用方法及查询命令的解释参见文档 
-https://docs.nvidia.com/doca/sdk/pcc/index.html
+
+#一些特殊的设置未在PCC文档中体现，参见如下：
 
 #设置pcc的速率，per dest ip，per qp或者per 5 tuple
 ROCE_CC_SHAPER_COALESCE
