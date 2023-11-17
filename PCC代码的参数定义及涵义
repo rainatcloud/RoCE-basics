@@ -11,7 +11,7 @@ typedef enum
     EVNT_FW         =  1,
     EVNT_ROCE_CNP   =  2,            // triggered every time a CNP is received
     EVNT_ROCE_TX    =  3,            // triggered by every burst size(8kB) or everytime a rtt_req are sent (ev_attr_flas == TX_FLAG_RTT_REQ_SENT)? 
-                                     第一个不是每8kB的数据触发一次，而是每4k一次，4k是写死的，和burst_size没关系，发完探测跑后立即触发event，4k burst的触发和RTT探测包的触发是独立的，不会互相等待
+                                     第一个不是每8kB的数据触发一次，而是每4k一次，4k是写死的，和burst_size没关系，发完探测包后立即触发event，4k burst的触发和RTT探测包的触发是独立的，不会互相等待
                                     　如果同时触发了rtt，会在tx的event里面带对应的flag
     EVNT_ROCE_ACK   =  4,            // triggered by every ack
     EVNT_ROCE_NACK  =  5,            // triggered by every nack
