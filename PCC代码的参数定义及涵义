@@ -1,8 +1,4 @@
 
-################################
-##注：本文只适用于BF2和CX6Dx，BF3的参见官方文档或DOCA PCC的贴子
-###############################
-
 1. event的触发条件机涵义
 event的触发是在发送和接收队列的时候把对应的event给到固件的event queue，作为输入传到算法里面
 typedef enum
@@ -53,3 +49,11 @@ mlxreg -d /dev/mst/mt41686_pciconf0 -y --set "cmd_type=2" --reg_name PPCC --inde
 fwtrace -d /dev/mst/mt4125_pciconf0 --tracer_mode MEM -i all -s --f cc_image_fw_strings.db -m 0 -l 4
 
 注意：在BF-2 上 --tracer_mode MEM 如果是CX-6 DX上，需要改用 --tracer_mode FIFO，否则追踪不到日志
+
+5. pcc_counter.sh查看收不到rtt的消息
+使用前确认，DOCA PCC是打开的
+sudo mlxreg -d /dev/mst/mt41692_pciconf0 -y --get --op "cmd_type=3" --reg_name PPCC --indexes "local_port=1,pnat=0,lp_msb=0,algo_slot=0,algo_param_index=0"
+“value                 | 0x00000001” means enabled
+
+打开方式： 
+sudo mlxreg -d /dev/mst/mt41692_pciconf0 -y --set  "cmd_type=1" --reg_name PPCC --indexes "local_port=1,pnat=0,lp_msb=0,algo_slot=0,algo_param_index=0"
