@@ -52,3 +52,12 @@ sudo mlxconfig -d /dev/mst/mt41686_pciconf0 -y s ROCE_CC_LEGACY_DCQCN=0
 sudo mlxconfig -d /dev/mst/mt41686_pciconf0 -y s USER_PROGRAMMABLE_CC=1
 #注意：BF2老的固件版本或者mft工具可能没有上述参数，需要更新固件，更新mft工具到最新版本
 
+3. 清除pcc固件
+
+#	Find the location of PCC image buffers
+ flint -d /dev/mst/mt4125_pciconf0 verify showitoc | grep PROGRAMMABLE_HW_FW
+     /0x01fa0000-0x01fbffff (0x020000)/ (PROGRAMMABLE_HW_FW) - CRC IGNORED
+     /0x01fc0000-0x01fdffff (0x020000)/ (PROGRAMMABLE_HW_FW) - CRC IGNORED
+#	Clear the flag of PCC image buffers to invalidate the fields
+ flint -d /dev/mst/mt4125_pciconf0 ww 0x01fa0000 0
+ flint -d /dev/mst/mt4125_pciconf0 ww 0x01fc0000 0
