@@ -28,4 +28,6 @@ watch -d -n 1 'for F in /sys/class/infiniband/mlx5_bond_0/ports/1/hw_counters/* 
 - local_ack_timeout_err - 对方没有在预期时间响应ACK，也是丢包
 - out_of_sequence (RDMA) - 收到的乱序包，但是没超出QP重传限制
 
-Pause
+
+#可以通过下面的github取到跑perftest的参考脚本
+https://github.com/Mellanox/ngc_multinode_perf
